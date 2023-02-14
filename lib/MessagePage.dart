@@ -245,7 +245,7 @@ class _MessagePageState extends State<MessagePage> {
           ),
         ),
         appBar: AppBar(
-          toolbarHeight: 75,
+          toolbarHeight: 60,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.vertical(
               bottom: Radius.circular(30),
@@ -347,7 +347,11 @@ class _MessagePageState extends State<MessagePage> {
                                           children: [
                                             Container(
                                               // width: MediaQuery.of(context).size.width*0.70,
-                                              margin: EdgeInsets.only(top: 10,bottom: 10,right: 5,left: 5),
+                                              margin: EdgeInsets.only(
+                                                  top: 10,
+                                                  bottom: 10,
+                                                  right: 5,
+                                                  left: 5),
                                               padding: EdgeInsets.all(11.0),
                                               child: (document["type"] ==
                                                       "image")
@@ -504,384 +508,146 @@ class _MessagePageState extends State<MessagePage> {
                 SizedBox(
                   height: 10,
                 ),
-                Container(
-                  height: 80,
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.only(
-                        topRight: Radius.circular(25),
-                        topLeft: Radius.circular(25),
-                      ),
-                      color: Colors.white.withOpacity(0.15)),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Container(
-                            height: 50.0,
-                            width: 200.0,
-                            child: TextField(
-                              style: TextStyle(color: Colors.white),
-                              cursorColor: Color.fromARGB(153, 190, 190, 190),
-                              keyboardType: TextInputType.text,
-                              controller: _chat,
-                              decoration: InputDecoration(hintText: 'Enter Message',hintStyle: TextStyle(color: Color.fromARGB(
-                                  255, 126, 126, 126)),
-                                  contentPadding:
-                                      EdgeInsets.symmetric(vertical: 0),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                        color: Colors.cyanAccent.shade100,
-                                        width: 2.0),
-                                    borderRadius: BorderRadius.circular(20.0),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                        color: Colors.cyanAccent.shade100,
-                                        width: 2.0),
-                                    borderRadius: BorderRadius.circular(20.0),
-                                  ),
-                                  prefixIcon: IconButton(
-                                    icon: Icon(
-                                      Icons.emoji_emotions_rounded,
-                                      color: Color.fromARGB(255, 210, 210, 210),
+                Padding(
+                  padding:  EdgeInsets.only(left: 5,right: 5,bottom: 5),
+                  child: Container(
+                    height: 60,
+
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(30),
+                        // borderRadius: BorderRadius.only(
+                        //   topRight: Radius.circular(25),
+                        //   topLeft: Radius.circular(25),
+                        // ),
+                        color: Colors.white.withOpacity(0.15)),
+                    child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Container(
+                              height: 50.0,
+                              width: 250.0,
+                              child: TextField(
+                                style: TextStyle(color: Colors.white),
+                                cursorColor: Color.fromARGB(153, 190, 190, 190),
+                                keyboardType: TextInputType.text,
+                                controller: _chat,
+                                decoration: InputDecoration(
+                                    hintText: 'Enter Message',
+                                    hintStyle: TextStyle(
+                                        color:
+                                            Color.fromARGB(255, 126, 126, 126)),
+                                    contentPadding:
+                                        EdgeInsets.symmetric(vertical: 0),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                          color: Colors.cyanAccent.shade100,
+                                          width: 2.0),
+                                      borderRadius: BorderRadius.circular(20.0),
                                     ),
-                                    onPressed: () {
-                                      setState(() {
-                                        emojiShowing = !emojiShowing;
-                                      });
-                                    },
-                                  ),
-                                  suffixIcon: Container(
-                                    alignment: Alignment.center,
-                                    width: 70.0,
-                                    child: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.end,
-                                      children: [
-                                        GestureDetector(
-                                          onTap: () async {
-                                            final content = Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.end,
-                                              children: [
-                                                Container(
-                                                  height: 200.0,
-                                                  width: MediaQuery.of(context)
-                                                      .size
-                                                      .width,
-                                                  padding: EdgeInsets.all(10.0),
-                                                  decoration: BoxDecoration(
-                                                    color: Color.fromARGB(255, 210, 210, 210),
-                                                    borderRadius:
-                                                        const BorderRadius.all(
-                                                            Radius.circular(
-                                                                10.0)),
-                                                  ),
-                                                  child: GridView(
-                                                      gridDelegate:
-                                                          SliverGridDelegateWithFixedCrossAxisCount(
-                                                        crossAxisCount: 3,
-                                                      ),
-                                                      children: [
-                                                        GestureDetector(
-                                                          onTap: () async {
-                                                            final XFile? image =
-                                                                await _picker.pickImage(
-                                                                    source: ImageSource
-                                                                        .camera);
-                                                            final XFile?
-                                                                image1 =
-                                                                await _picker.pickVideo(
-                                                                    source: ImageSource
-                                                                        .camera);
-                                                            imagefile = File(
-                                                                image!.path);
-                                                            upload();
-                                                            Navigator.of(
-                                                                    context)
-                                                                .pop();
-                                                          },
-                                                          child: Column(
-                                                            children: [
-                                                              Container(
-                                                                height: 60.0,
-                                                                width: 60.0,
-                                                                decoration: BoxDecoration(
-                                                                    shape: BoxShape
-                                                                        .circle,
-                                                                    color: Colors
-                                                                        .lightBlue),
-                                                                child: Icon(
-                                                                  Icons
-                                                                      .camera_alt_outlined,
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                          color: Colors.cyanAccent.shade100,
+                                          width: 2.0),
+                                      borderRadius: BorderRadius.circular(20.0),
+                                    ),
+                                    prefixIcon: IconButton(
+                                      icon: Icon(
+                                        Icons.emoji_emotions_rounded,
+                                        color: Color.fromARGB(255, 210, 210, 210),
+                                      ),
+                                      onPressed: () {
+                                        setState(() {
+                                          emojiShowing = !emojiShowing;
+                                        });
+                                      },
+                                    ),
+                                    suffixIcon: GestureDetector(
+                                      onTap: () async {
+                                        permission();
+                                        DateTime now = DateTime.now();
+                                        String formattedDate =
+                                            DateFormat("dd-MM-yy")
+                                                .format(now);
+                                        print(formattedDate);
+                                        String formattedDate1 =
+                                            DateFormat('')
+                                                .add_jms()
+                                                .format(now);
+                                        print(formattedDate);
+                                        print(formattedDate1);
 
-                                                                  size: 30.0,
-                                                                ),
-                                                              ),
-                                                              Text("Camera"),
-                                                            ],
-                                                          ),
-                                                        ),
-                                                        GestureDetector(
-                                                          onTap: () async {
-                                                            final XFile? image =
-                                                                await _picker.pickVideo(
-                                                                    source: ImageSource
-                                                                        .gallery);
-                                                            imagefile = File(
-                                                                image!.path);
-
-                                                            video();
-                                                            showFilePicker(
-                                                                FileType.video);
-                                                            Navigator.of(
-                                                                    context)
-                                                                .pop();
-                                                          },
-                                                          child: Column(
-                                                            children: [
-                                                              Container(
-                                                                height: 60.0,
-                                                                width: 60.0,
-                                                                decoration: BoxDecoration(
-                                                                    shape: BoxShape
-                                                                        .circle,
-                                                                    color: Colors
-                                                                        .lightBlue),
-                                                                child: Icon(
-                                                                  Icons.photo,
-                                                                  color: Colors
-                                                                      .white,
-                                                                  size: 30.0,
-                                                                ),
-                                                              ),
-                                                              Text("Gallery"),
-                                                            ],
-                                                          ),
-                                                        ),
-                                                        GestureDetector(
-                                                          onTap: () {
-                                                            Navigator.of(
-                                                                    context)
-                                                                .pop();
-                                                          },
-                                                          child: Column(
-                                                            children: [
-                                                              Container(
-                                                                height: 60.0,
-                                                                width: 60.0,
-                                                                decoration: BoxDecoration(
-                                                                    shape: BoxShape
-                                                                        .circle,
-                                                                    color: Colors
-                                                                        .lightBlue),
-                                                                child: Icon(
-                                                                  Icons
-                                                                      .location_on,
-                                                                  color: Colors
-                                                                      .white,
-                                                                  size: 30.0,
-                                                                ),
-                                                              ),
-                                                              Text("Location"),
-                                                            ],
-                                                          ),
-                                                        ),
-                                                        GestureDetector(
-                                                          onTap: () {
-                                                            Navigator.of(
-                                                                    context)
-                                                                .pop();
-                                                          },
-                                                          child: Column(
-                                                            children: [
-                                                              Container(
-                                                                height: 60.0,
-                                                                width: 60.0,
-                                                                decoration: BoxDecoration(
-                                                                    shape: BoxShape
-                                                                        .circle,
-                                                                    color: Colors
-                                                                        .lightBlue),
-                                                                child: Icon(
-                                                                  Icons.person,
-                                                                  color: Colors
-                                                                      .white,
-                                                                  size: 30.0,
-                                                                ),
-                                                              ),
-                                                              Text("Contact"),
-                                                            ],
-                                                          ),
-                                                        ),
-                                                        GestureDetector(
-                                                          onTap: () async {
-                                                            FilePickerResult?
-                                                                result =
-                                                                await FilePicker
-                                                                    .platform
-                                                                    .pickFiles();
-
-                                                            if (result !=
-                                                                null) {
-                                                              imagefile = File(
-                                                                  result
-                                                                      .files
-                                                                      .single
-                                                                      .path
-                                                                      .toString());
-                                                              // upload1();
-                                                            } else {
-                                                              print(
-                                                                  "No file selected");
-                                                            }
-                                                            Navigator.of(
-                                                                    context)
-                                                                .pop();
-                                                          },
-                                                          child: Column(
-                                                            children: [
-                                                              Container(
-                                                                height: 60.0,
-                                                                width: 60.0,
-                                                                decoration: BoxDecoration(
-                                                                    shape: BoxShape
-                                                                        .circle,
-                                                                    color: Colors
-                                                                        .lightBlue),
-                                                                child: Icon(
-                                                                  Icons
-                                                                      .contact_page,
-                                                                  color: Colors
-                                                                      .white,
-                                                                  size: 30.0,
-                                                                ),
-                                                              ),
-                                                              Text("Document"),
-                                                            ],
-                                                          ),
-                                                        ),
-                                                      ]),
-                                                ),
-                                                SizedBox(
-                                                  height: 10,
-                                                ),
-                                              ],
-                                            );
-
-                                            showDialog(
-                                                context: context,
-                                                builder: (ctx) {
-                                                  return FractionallySizedBox(
-                                                    widthFactor: 0.9,
-                                                    child: Material(
-                                                      type: MaterialType
-                                                          .transparency,
-                                                      child: content,
-                                                    ),
-                                                  );
-                                                });
-                                          },
-                                          child: Icon(
-                                            Icons.attach_file,
-                                            color:
-                                            Color.fromARGB(255, 210, 210, 210),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          width: 5.0,
-                                        ),
-                                        GestureDetector(
-                                          onTap: () async {
-                                            permission();
-                                            DateTime now = DateTime.now();
-                                            String formattedDate =
-                                                DateFormat("dd-MM-yy")
-                                                    .format(now);
-                                            print(formattedDate);
-                                            String formattedDate1 =
-                                                DateFormat('')
-                                                    .add_jms()
-                                                    .format(now);
-                                            print(formattedDate);
-                                            print(formattedDate1);
-
-                                            final XFile? image =
-                                                await _picker.pickImage(
-                                                    source: ImageSource.camera);
-                                            imagefile = File(image!.path);
-                                            var uuid = Uuid();
-                                            var filename =
-                                                uuid.v4().toString() + ".jpg";
-                                            print("file:" + filename);
-                                            await FirebaseStorage.instance
-                                                .ref(filename)
-                                                .putFile(imagefile!)
-                                                .whenComplete(() {})
-                                                .then((filedata) async {
-                                              filedata.ref
-                                                  .getDownloadURL()
-                                                  .then((fileurl) async {
-                                                await FirebaseFirestore.instance
-                                                    .collection("user")
-                                                    .doc(senderid)
-                                                    .collection("chat")
-                                                    .doc(receiverid)
-                                                    .collection("message")
-                                                    .add({
-                                                  "senderid": senderid,
-                                                  "receiverid": receiverid,
-                                                  "massages": fileurl,
-                                                  "type": "image",
-                                                  "time": formattedDate1,
-                                                  "date": formattedDate,
-                                                }).then((value) async {
-                                                  await FirebaseFirestore
-                                                      .instance
-                                                      .collection("user")
-                                                      .doc(receiverid)
-                                                      .collection("chat")
-                                                      .doc(senderid)
-                                                      .collection("message")
-                                                      .add({
-                                                    "senderid": senderid,
-                                                    "receiverid": receiverid,
-                                                    "massages": fileurl,
-                                                    "type": "image",
-                                                    "time": formattedDate1,
-                                                    "date": formattedDate,
-                                                  }).then((value) {
-                                                    _chat.text.toString();
-                                                    _scrollController.animateTo(
-                                                        _scrollController
-                                                            .position
-                                                            .minScrollExtent,
-                                                        duration: Duration(
-                                                            milliseconds: 200),
-                                                        curve:
-                                                            Curves.easeInOut);
-                                                  });
-                                                });
+                                        final XFile? image =
+                                            await _picker.pickImage(
+                                                source: ImageSource.camera);
+                                        imagefile = File(image!.path);
+                                        var uuid = Uuid();
+                                        var filename =
+                                            uuid.v4().toString() + ".jpg";
+                                        print("file:" + filename);
+                                        await FirebaseStorage.instance
+                                            .ref(filename)
+                                            .putFile(imagefile!)
+                                            .whenComplete(() {})
+                                            .then((filedata) async {
+                                          filedata.ref
+                                              .getDownloadURL()
+                                              .then((fileurl) async {
+                                            await FirebaseFirestore.instance
+                                                .collection("user")
+                                                .doc(senderid)
+                                                .collection("chat")
+                                                .doc(receiverid)
+                                                .collection("message")
+                                                .add({
+                                              "senderid": senderid,
+                                              "receiverid": receiverid,
+                                              "massages": fileurl,
+                                              "type": "image",
+                                              "time": formattedDate1,
+                                              "date": formattedDate,
+                                            }).then((value) async {
+                                              await FirebaseFirestore
+                                                  .instance
+                                                  .collection("user")
+                                                  .doc(receiverid)
+                                                  .collection("chat")
+                                                  .doc(senderid)
+                                                  .collection("message")
+                                                  .add({
+                                                "senderid": senderid,
+                                                "receiverid": receiverid,
+                                                "massages": fileurl,
+                                                "type": "image",
+                                                "time": formattedDate1,
+                                                "date": formattedDate,
+                                              }).then((value) {
+                                                _chat.text.toString();
+                                                _scrollController.animateTo(
+                                                    _scrollController
+                                                        .position
+                                                        .minScrollExtent,
+                                                    duration: Duration(
+                                                        milliseconds: 200),
+                                                    curve:
+                                                        Curves.easeInOut);
                                               });
                                             });
-                                          },
-                                          child: Icon(
-                                            Icons.camera_alt_outlined,
-                                            color:
-                                            Color.fromARGB(255, 210, 210, 210),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  )),
+                                          });
+                                        });
+                                      },
+                                      child: Icon(
+                                        Icons.camera_alt_outlined,
+                                        color: Color.fromARGB(
+                                            255, 210, 210, 210),
+                                      ),
+                                    )),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.all(8.0),
-                        child: IconButton(
+                        IconButton(
                             onPressed: () async {
                               SharedPreferences pref =
                                   await SharedPreferences.getInstance();
@@ -945,8 +711,8 @@ class _MessagePageState extends State<MessagePage> {
                               Icons.send,
                               color: Color.fromARGB(255, 210, 210, 210),
                             )),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
                 Offstage(
