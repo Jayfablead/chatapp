@@ -36,16 +36,18 @@ class _addvideoState extends State<addvideo> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
-      body: Center(
-        child: _controller!.value.isInitialized
-            ? AspectRatio(
-                aspectRatio: _controller!.value.aspectRatio,
-                child: VideoPlayer(_controller!),
-              )
-            : Container(),
+      backgroundColor: Colors.transparent,
+      body: ClipRRect(borderRadius: BorderRadius.circular(20),
+        child: Center(
+          child: _controller!.value.isInitialized
+              ? AspectRatio(
+                  aspectRatio: _controller!.value.aspectRatio,
+                  child: VideoPlayer(_controller!),
+                )
+              : Container(),
+        ),
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton(backgroundColor: Colors.transparent,
         onPressed: () {
           setState(() {
             _controller!.value.isPlaying
@@ -57,6 +59,7 @@ class _addvideoState extends State<addvideo> {
           _controller!.value.isPlaying ? Icons.pause : Icons.play_arrow,
         ),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 }

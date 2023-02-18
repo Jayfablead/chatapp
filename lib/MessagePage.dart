@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:chat1/addvideo.dart';
+import 'package:chat1/allConstants/livelocation.dart';
 import 'package:chat1/screens/profilepage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:contacts_service/contacts_service.dart';
@@ -19,6 +20,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:uuid/uuid.dart';
+
+import 'allConstants/showloc.dart';
 
 class MessagePage extends StatefulWidget {
   var username, useremail, userphoto, receiverid;
@@ -40,6 +43,7 @@ class _MessagePageState extends State<MessagePage> {
   String? date;
   int? diff;
   bool emojiShowing = false;
+  File? file;
 
   // int formattedTime =(DateFormat.Hm().format(DateTime.now()));
 
@@ -126,6 +130,10 @@ class _MessagePageState extends State<MessagePage> {
             "time": formattedDate1.toString(),
           }).then((value) {
             _chat.text.toString();
+            _scrollController.animateTo(
+                _scrollController.position.minScrollExtent,
+                duration: Duration(milliseconds: 200),
+                curve: Curves.easeInOut);
           });
         });
       });
@@ -174,6 +182,10 @@ class _MessagePageState extends State<MessagePage> {
             "time": formattedDate1.toString(),
           }).then((value) {
             _chat.text.toString();
+            _scrollController.animateTo(
+                _scrollController.position.minScrollExtent,
+                duration: Duration(milliseconds: 200),
+                curve: Curves.easeInOut);
           });
         });
       });
@@ -348,58 +360,87 @@ class _MessagePageState extends State<MessagePage> {
                                             Container(
                                               // width: MediaQuery.of(context).size.width*0.70,
                                               margin: EdgeInsets.only(
-                                                  top: 10,
-                                                  bottom: 10,
+                                                  top: 8,
+                                                  bottom: 8,
                                                   right: 5,
                                                   left: 5),
-                                              padding: EdgeInsets.all(11.0),
+                                              padding: EdgeInsets.all(9.0),
                                               child: (document["type"] ==
                                                       "image")
-                                                  ? Image.network(
-                                                      document["massages"],
-                                                      width: 250.0,
-                                                      height: 250.0,
-                                                      fit: BoxFit.cover,
+                                                  ? ClipRRect(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              20),
+                                                      child: Image.network(
+                                                        document["massages"],
+                                                        width: 250.0,
+                                                        height: 250.0,
+                                                        fit: BoxFit.cover,
+                                                      ),
                                                     )
                                                   : (document["type"] ==
                                                           "video")
-                                                      ? GestureDetector(
-                                                          onTap: () async {
-                                                            Navigator.of(context).push(
-                                                                MaterialPageRoute(
-                                                                    builder:
-                                                                        (context) =>
-                                                                            addvideo(
-                                                                              vid: document["massages"],
-                                                                            )));
-                                                          },
-                                                          child: Container(
-                                                              height: 19.0,
-                                                              // padding:
-                                                              //     EdgeInsets.all(1.0),
-                                                              child: Text(
-                                                                "Video",
-                                                                style: TextStyle(
-                                                                    fontSize:
-                                                                        15.0),
-                                                              )),
+                                                      ? Container(
+                                                          decoration: BoxDecoration(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          20)),
+                                                          height: 300,
+                                                          width: 170,
+                                                          child: addvideo(
+                                                              vid: document[
+                                                                  "massages"]),
                                                         )
-                                                      : Text(
-                                                          document["massages"],
-                                                          maxLines: 20,
-                                                          style: TextStyle(
-                                                              color:
-                                                                  Colors.white,
-                                                              fontSize: 15.0),
-                                                          textAlign:
-                                                              TextAlign.right,
-                                                        ),
+                                                      // ? GestureDetector(
+                                                      //     onTap: () async {
+                                                      //       Navigator.of(context).push(
+                                                      //           MaterialPageRoute(
+                                                      //               builder:
+                                                      //                   (context) =>
+                                                      //                       addvideo(
+                                                      //                         vid: document["massages"],
+                                                      //                       )));
+                                                      //     },
+                                                      //     child: Container(
+                                                      //         height: 19.0,
+                                                      //         // padding:
+                                                      //         //     EdgeInsets.all(1.0),
+                                                      //         child: Text(
+                                                      //           "Video",
+                                                      //           style: TextStyle(
+                                                      //               fontSize:
+                                                      //                   15.0),
+                                                      //         )),
+                                                      //   )
+                                                      : (document["type"] ==
+                                                              "location")
+                                                          ? Container(
+                                                              height: 200,
+                                                              width: 400,
+                                                              child: Showloc(
+                                                                loc: widget
+                                                                    .receiverid,
+                                                              ))
+                                                          : Text(
+                                                              document[
+                                                                  "massages"],
+                                                              maxLines: 20,
+                                                              style: TextStyle(
+                                                                  color: Colors
+                                                                      .black,
+                                                                  fontSize:
+                                                                      15.0),
+                                                              textAlign:
+                                                                  TextAlign
+                                                                      .right,
+                                                            ),
 
                                               decoration: BoxDecoration(
                                                 color: (document["type"] ==
                                                         "image")
-                                                    ? Colors.grey.shade100
-                                                    : Color(0xff3AA1FF),
+                                                    ? Color(0xff3AA1FF)
+                                                    : Color(0xff3AAFF1),
                                                 borderRadius: BorderRadius.only(
                                                     topRight:
                                                         Radius.circular(25),
@@ -436,42 +477,56 @@ class _MessagePageState extends State<MessagePage> {
                                             // width: 220.0,
                                             margin: EdgeInsets.symmetric(
                                                 vertical: 10.0),
-                                            padding: EdgeInsets.all(15.0),
+                                            padding: EdgeInsets.all(10.0),
                                             child: (document["type"] == "image")
-                                                ? Image.network(
-                                                    document["massages"],
-                                                    width: 250.0,
-                                                    height: 250.0,
-                                                    fit: BoxFit.cover,
+                                                ? ClipRRect(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            20),
+                                                    child: Image.network(
+                                                      document["massages"],
+                                                      width: 250.0,
+                                                      height: 250.0,
+                                                      fit: BoxFit.cover,
+                                                    ),
                                                   )
                                                 : (document["type"] == "video")
-                                                    ? GestureDetector(
-                                                        onTap: () async {
-                                                          Navigator.of(context).push(
-                                                              MaterialPageRoute(
-                                                                  builder:
-                                                                      (context) =>
-                                                                          addvideo(
-                                                                            vid:
-                                                                                document["massages"],
-                                                                          )));
-                                                        },
-                                                        child: Text("Video"),
-                                                      )
-                                                    : Text(
-                                                        document["massages"],
-                                                        style: TextStyle(
-                                                            color:
-                                                                Colors.white),
-                                                        textAlign:
-                                                            TextAlign.left,
-                                                      ),
+                                                    ? Container(
+                                              decoration: BoxDecoration(
+                                                  borderRadius:
+                                                  BorderRadius
+                                                      .circular(
+                                                      20)),
+                                              height: 300,
+                                              width: 170,
+                                              child: addvideo(
+                                                  vid: document[
+                                                  "massages"]),
+                                            )
+                                                    : (document["type"] ==
+                                                            "location")
+                                                        ? Container(
+                                                            height: 200,
+                                                            width: 400,
+                                                            child: Showloc(
+                                                              loc: widget
+                                                                  .receiverid,
+                                                            ),
+                                                          )
+                                                        : Text(
+                                                            document[
+                                                                "massages"],
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .white),
+                                                            textAlign:
+                                                                TextAlign.left,
+                                                          ),
                                             decoration: BoxDecoration(
                                               color:
                                                   (document["type"] == "image")
-                                                      ? Color.fromARGB(
-                                                          255, 245, 245, 245)
-                                                      : Color(0xffb4776e6)
+                                                      ? Color(0xff223152)
+                                                      : Color(0xff223152)
                                                           .withOpacity(0.3),
                                               borderRadius: BorderRadius.only(
                                                   topRight: Radius.circular(25),
@@ -509,31 +564,291 @@ class _MessagePageState extends State<MessagePage> {
                   height: 10,
                 ),
                 Padding(
-                  padding:  EdgeInsets.only(left: 5,right: 5,bottom: 5),
-                  child: Container(
-                    height: 60,
+                  padding: EdgeInsets.only(left: 5, right: 5, bottom: 5),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        onPressed: () async {
+                          final content = Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Container(
+                                height: 200.0,
+                                width: MediaQuery.of(context).size.width,
+                                padding: EdgeInsets.all(10.0),
+                                decoration: BoxDecoration(
+                                  color: Color(0xff131313),
+                                  borderRadius: const BorderRadius.all(
+                                      Radius.circular(10.0)),
+                                ),
+                                child: GridView(
+                                    gridDelegate:
+                                        SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: 3,
+                                    ),
+                                    children: [
+                                      GestureDetector(
+                                        onTap: () async {
+                                          permission();
+                                          DateTime now = DateTime.now();
+                                          String formattedDate =
+                                              DateFormat("dd-MM-yy")
+                                                  .format(now);
+                                          print(formattedDate);
+                                          String formattedDate1 = DateFormat('')
+                                              .add_jms()
+                                              .format(now);
+                                          print(formattedDate);
+                                          print(formattedDate1);
+                                          final XFile? image =
+                                              await _picker.pickImage(
+                                                  source: ImageSource.camera);
+                                          imagefile = File(image!.path);
+                                          var uuid = Uuid();
+                                          var filename =
+                                              uuid.v4().toString() + ".jpg";
+                                          print("file:" + filename);
+                                          await FirebaseStorage.instance
+                                              .ref(filename)
+                                              .putFile(imagefile!)
+                                              .whenComplete(() {})
+                                              .then((filedata) async {
+                                            filedata.ref
+                                                .getDownloadURL()
+                                                .then((fileurl) async {
+                                              await FirebaseFirestore.instance
+                                                  .collection("user")
+                                                  .doc(senderid)
+                                                  .collection("chat")
+                                                  .doc(receiverid)
+                                                  .collection("message")
+                                                  .add({
+                                                "senderid": senderid,
+                                                "receiverid": receiverid,
+                                                "massages": fileurl,
+                                                "type": "image",
+                                                "time": formattedDate1,
+                                                "date": formattedDate,
+                                              }).then((value) async {
+                                                await FirebaseFirestore.instance
+                                                    .collection("user")
+                                                    .doc(receiverid)
+                                                    .collection("chat")
+                                                    .doc(senderid)
+                                                    .collection("message")
+                                                    .add({
+                                                  "senderid": senderid,
+                                                  "receiverid": receiverid,
+                                                  "massages": fileurl,
+                                                  "type": "image",
+                                                  "time": formattedDate1,
+                                                  "date": formattedDate,
+                                                }).then((value) {
+                                                  _chat.text.toString();
+                                                });
+                                              });
+                                            });
+                                          });
+                                        },
+                                        child: Column(
+                                          children: [
+                                            Container(
+                                              height: 60.0,
+                                              width: 60.0,
+                                              decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  color: Colors.cyanAccent),
+                                              child: Icon(
+                                                Icons.camera_alt_outlined,
+                                                color: Colors.black,
+                                                size: 30.0,
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              height: 10,
+                                            ),
+                                            Text(
+                                              "Camera",
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      GestureDetector(
+                                        onTap: () async {
+                                          final XFile? image =
+                                              await _picker.pickImage(
+                                                  source: ImageSource.gallery);
 
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(30),
-                        // borderRadius: BorderRadius.only(
-                        //   topRight: Radius.circular(25),
-                        //   topLeft: Radius.circular(25),
-                        // ),
-                        color: Colors.white.withOpacity(0.15)),
-                    child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Expanded(
-                          child: Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Container(
-                              height: 50.0,
-                              width: 250.0,
-                              child: TextField(
-                                style: TextStyle(color: Colors.white),
-                                cursorColor: Color.fromARGB(153, 190, 190, 190),
-                                keyboardType: TextInputType.text,
-                                controller: _chat,
-                                decoration: InputDecoration(
+                                          imagefile = File(image!.path);
+                                          upload();
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: Column(
+                                          children: [
+                                            Container(
+                                              height: 60.0,
+                                              width: 60.0,
+                                              decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  color: Colors.cyanAccent),
+                                              child: Icon(
+                                                Icons.photo,
+                                                color: Colors.black,
+                                                size: 30.0,
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              height: 10,
+                                            ),
+                                            Text(
+                                              "Photos",
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      GestureDetector(
+                                        onTap: () async {
+                                          final XFile? image =
+                                              await _picker.pickVideo(
+                                                  source: ImageSource.gallery);
+                                          imagefile = File(image!.path);
+                                          video();
+                                          showFilePicker(FileType.any);
+
+                                          // FilePickerResult? imagefile =
+                                          // await FilePicker.platform
+                                          //     .pickFiles(
+                                          //     type: FileType.any,
+                                          //     allowMultiple:
+                                          //     false);
+                                          //
+                                          // if (imagefile == null) return;
+                                          // final path = imagefile
+                                          //     .files.single.path!;
+                                          // setState(() {
+                                          //   file=File(path);
+                                          // });
+                                          // // final XFile? image = await _picker.pickImage(source: ImageSource.camera);
+                                          // imagefile = File(image!.path);
+
+                                          // video();
+                                          // showFilePicker(
+                                          //     FileType.video);
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: Column(
+                                          children: [
+                                            Container(
+                                              height: 60.0,
+                                              width: 60.0,
+                                              decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  color: Colors.cyanAccent),
+                                              child: Icon(
+                                                Icons
+                                                    .video_camera_back_outlined,
+                                                color: Colors.black,
+                                                size: 30.0,
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              height: 10,
+                                            ),
+                                            Text(
+                                              "Videos",
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      InkWell(
+                                        onTap: () {
+                                          print('hello');
+                                          Navigator.of(context)
+                                              .push(MaterialPageRoute(
+                                            builder: (context) => location(
+                                              loc: widget.receiverid,
+                                            ),
+                                          ));
+                                        },
+                                        child: Column(
+                                          children: [
+                                            Container(
+                                              height: 60.0,
+                                              width: 60.0,
+                                              decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  color: Colors.cyanAccent),
+                                              child: Icon(
+                                                Icons.location_on_outlined,
+                                                color: Colors.black,
+                                                size: 30.0,
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              height: 10,
+                                            ),
+                                            Text(
+                                              "Location",
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ]),
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                            ],
+                          );
+                          showDialog(
+                              context: context,
+                              builder: (ctx) {
+                                return FractionallySizedBox(
+                                  widthFactor: 0.9,
+                                  child: Material(
+                                    type: MaterialType.transparency,
+                                    child: content,
+                                  ),
+                                );
+                              });
+                        },
+                        icon: Icon(
+                          Icons.attach_file_rounded,
+                          color: Colors.cyanAccent,
+                        ),
+                      ),
+                      Container(
+                        height: 60,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(30),
+                            // borderRadius: BorderRadius.only(
+                            //   topRight: Radius.circular(25),
+                            //   topLeft: Radius.circular(25),
+                            // ),
+                            color: Colors.white.withOpacity(0.15)),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Container(
+                                height: 50.0,
+                                width: 260,
+                                child: TextField(
+                                  style: TextStyle(color: Colors.white),
+                                  cursorColor:
+                                      Color.fromARGB(153, 190, 190, 190),
+                                  keyboardType: TextInputType.text,
+                                  controller: _chat,
+                                  decoration: InputDecoration(
                                     hintText: 'Enter Message',
                                     hintStyle: TextStyle(
                                         color:
@@ -555,7 +870,8 @@ class _MessagePageState extends State<MessagePage> {
                                     prefixIcon: IconButton(
                                       icon: Icon(
                                         Icons.emoji_emotions_rounded,
-                                        color: Color.fromARGB(255, 210, 210, 210),
+                                        color:
+                                            Color.fromARGB(255, 210, 210, 210),
                                       ),
                                       onPressed: () {
                                         setState(() {
@@ -563,156 +879,79 @@ class _MessagePageState extends State<MessagePage> {
                                         });
                                       },
                                     ),
-                                    suffixIcon: GestureDetector(
-                                      onTap: () async {
-                                        permission();
-                                        DateTime now = DateTime.now();
-                                        String formattedDate =
-                                            DateFormat("dd-MM-yy")
-                                                .format(now);
-                                        print(formattedDate);
-                                        String formattedDate1 =
-                                            DateFormat('')
-                                                .add_jms()
-                                                .format(now);
-                                        print(formattedDate);
-                                        print(formattedDate1);
-
-                                        final XFile? image =
-                                            await _picker.pickImage(
-                                                source: ImageSource.camera);
-                                        imagefile = File(image!.path);
-                                        var uuid = Uuid();
-                                        var filename =
-                                            uuid.v4().toString() + ".jpg";
-                                        print("file:" + filename);
-                                        await FirebaseStorage.instance
-                                            .ref(filename)
-                                            .putFile(imagefile!)
-                                            .whenComplete(() {})
-                                            .then((filedata) async {
-                                          filedata.ref
-                                              .getDownloadURL()
-                                              .then((fileurl) async {
-                                            await FirebaseFirestore.instance
-                                                .collection("user")
-                                                .doc(senderid)
-                                                .collection("chat")
-                                                .doc(receiverid)
-                                                .collection("message")
-                                                .add({
-                                              "senderid": senderid,
-                                              "receiverid": receiverid,
-                                              "massages": fileurl,
-                                              "type": "image",
-                                              "time": formattedDate1,
-                                              "date": formattedDate,
-                                            }).then((value) async {
-                                              await FirebaseFirestore
-                                                  .instance
-                                                  .collection("user")
-                                                  .doc(receiverid)
-                                                  .collection("chat")
-                                                  .doc(senderid)
-                                                  .collection("message")
-                                                  .add({
-                                                "senderid": senderid,
-                                                "receiverid": receiverid,
-                                                "massages": fileurl,
-                                                "type": "image",
-                                                "time": formattedDate1,
-                                                "date": formattedDate,
-                                              }).then((value) {
-                                                _chat.text.toString();
-                                                _scrollController.animateTo(
-                                                    _scrollController
-                                                        .position
-                                                        .minScrollExtent,
-                                                    duration: Duration(
-                                                        milliseconds: 200),
-                                                    curve:
-                                                        Curves.easeInOut);
-                                              });
-                                            });
-                                          });
-                                        });
-                                      },
-                                      child: Icon(
-                                        Icons.camera_alt_outlined,
-                                        color: Color.fromARGB(
-                                            255, 210, 210, 210),
-                                      ),
-                                    )),
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
+                            IconButton(
+                                onPressed: () async {
+                                  SharedPreferences pref =
+                                      await SharedPreferences.getInstance();
+                                  var senderid = pref.getString("senderid");
+                                  var receiverid = widget.receiverid;
+                                  print("senderid : " + senderid!);
+                                  print("receiverid : " + receiverid);
+                                  DateTime now = DateTime.now();
+                                  String formattedDate =
+                                      DateFormat("dd-MM-yy").format(now);
+                                  print(formattedDate);
+                                  String formattedDate1 =
+                                      DateFormat().add_jms().format(now);
+                                  print(formattedDate);
+                                  print(formattedDate1);
+
+                                  var msg = _chat.text.toString();
+                                  print(msg);
+
+                                  if (msg.length >= 1) {
+                                    await FirebaseFirestore.instance
+                                        .collection("user")
+                                        .doc(senderid)
+                                        .collection("chat")
+                                        .doc(receiverid)
+                                        .collection("message")
+                                        .add({
+                                      "senderid": senderid,
+                                      "receiverid": receiverid,
+                                      "massages": msg,
+                                      "type": "text",
+                                      "date": formattedDate.toString(),
+                                      "time": formattedDate1.toString(),
+                                    }).then((value) async {
+                                      await FirebaseFirestore.instance
+                                          .collection("user")
+                                          .doc(receiverid)
+                                          .collection("chat")
+                                          .doc(senderid)
+                                          .collection("message")
+                                          .add({
+                                        "senderid": senderid,
+                                        "receiverid": receiverid,
+                                        "massages": msg,
+                                        "type": "text",
+                                        "date": formattedDate.toString(),
+                                        "time": formattedDate1.toString(),
+                                      }).then((value) {
+                                        print(value);
+                                        _chat.text = '';
+                                        _scrollController.animateTo(
+                                            _scrollController
+                                                .position.minScrollExtent,
+                                            duration:
+                                                Duration(milliseconds: 200),
+                                            curve: Curves.easeInOut);
+                                      });
+                                    });
+                                  }
+                                },
+                                icon: Icon(
+                                  Icons.send,
+                                  color: Color.fromARGB(255, 210, 210, 210),
+                                )),
+                          ],
                         ),
-                        IconButton(
-                            onPressed: () async {
-                              SharedPreferences pref =
-                                  await SharedPreferences.getInstance();
-                              var senderid = pref.getString("senderid");
-                              var receiverid = widget.receiverid;
-                              print("senderid : " + senderid!);
-                              print("receiverid : " + receiverid);
-                              DateTime now = DateTime.now();
-                              String formattedDate =
-                                  DateFormat("dd-MM-yy").format(now);
-                              print(formattedDate);
-                              String formattedDate1 =
-                                  DateFormat().add_jms().format(now);
-                              print(formattedDate);
-                              print(formattedDate1);
-
-                              var msg = _chat.text.toString();
-                              print(msg);
-
-                              if (msg.length >= 1) {
-                                await FirebaseFirestore.instance
-                                    .collection("user")
-                                    .doc(senderid)
-                                    .collection("chat")
-                                    .doc(receiverid)
-                                    .collection("message")
-                                    .add({
-                                  "senderid": senderid,
-                                  "receiverid": receiverid,
-                                  "massages": msg,
-                                  "type": "text",
-                                  "date": formattedDate.toString(),
-                                  "time": formattedDate1.toString(),
-                                }).then((value) async {
-                                  await FirebaseFirestore.instance
-                                      .collection("user")
-                                      .doc(receiverid)
-                                      .collection("chat")
-                                      .doc(senderid)
-                                      .collection("message")
-                                      .add({
-                                    "senderid": senderid,
-                                    "receiverid": receiverid,
-                                    "massages": msg,
-                                    "type": "text",
-                                    "date": formattedDate.toString(),
-                                    "time": formattedDate1.toString(),
-                                  }).then((value) {
-                                    print(value);
-                                    _chat.text = "";
-                                    _scrollController.animateTo(
-                                        _scrollController
-                                            .position.minScrollExtent,
-                                        duration: Duration(milliseconds: 200),
-                                        curve: Curves.easeInOut);
-                                  });
-                                });
-                              }
-                            },
-                            icon: Icon(
-                              Icons.send,
-                              color: Color.fromARGB(255, 210, 210, 210),
-                            )),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
                 Offstage(
