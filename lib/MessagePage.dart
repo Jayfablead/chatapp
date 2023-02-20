@@ -88,9 +88,11 @@ class _MessagePageState extends State<MessagePage> {
   }
 
   upload() async {
-    DateTime now = DateTime.now();
-    String formattedDate = DateFormat('dd-MM-yy').format(now);
-    String formattedDate1 = DateFormat('').add_jms().format(now);
+    DateTime date = DateTime.now();
+    print(date);
+    String formattedDate = DateFormat('dd-MM-yy').format(date);
+    String formattedDate1 = DateFormat().add_jm().format(DateTime.now());
+    print(formattedDate1);
     var uuid = Uuid();
     var filename = uuid.v4().toString() + ".jpg";
     print("file:" + filename);
@@ -113,7 +115,9 @@ class _MessagePageState extends State<MessagePage> {
           "massages": fileurl,
           "type": "image",
           "date": formattedDate.toString(),
-          "time": formattedDate1.toString(),
+          "time": date.toString(), "timestrap": formattedDate1.toString(),
+
+          // "timestamp": formattedDate1.toString(),
         }).then((value) async {
           await FirebaseFirestore.instance
               .collection("user")
@@ -127,9 +131,10 @@ class _MessagePageState extends State<MessagePage> {
             "massages": fileurl,
             "type": "image",
             "date": formattedDate.toString(),
-            "time": formattedDate1.toString(),
+            "time": date.toString(), "timestrap": formattedDate1.toString(),
+
+            // "timestamp": formattedDate1.toString(),
           }).then((value) {
-            _chat.text.toString();
             _scrollController.animateTo(
                 _scrollController.position.minScrollExtent,
                 duration: Duration(milliseconds: 200),
@@ -143,7 +148,7 @@ class _MessagePageState extends State<MessagePage> {
   video() async {
     DateTime now = DateTime.now();
     String formattedDate = DateFormat('dd-MM-yy').format(now);
-    String formattedDate1 = DateFormat('').add_jms().format(now);
+    String formattedDate1 = DateFormat().add_jm().format(DateTime.now());
     var uuid = Uuid();
     var filename = uuid.v4().toString() + ".mp4";
     await FirebaseStorage.instance
@@ -165,7 +170,9 @@ class _MessagePageState extends State<MessagePage> {
           "massages": fileurl,
           "type": "video",
           "date": formattedDate.toString(),
-          "time": formattedDate1.toString(),
+          "time": now.toString(),
+          "timestrap": formattedDate1.toString(),
+          // "timestamp": formattedDate1.toString(),
         }).then((value) async {
           await FirebaseFirestore.instance
               .collection("user")
@@ -179,7 +186,9 @@ class _MessagePageState extends State<MessagePage> {
             "massages": fileurl,
             "type": "video",
             "date": formattedDate.toString(),
-            "time": formattedDate1.toString(),
+            "time": now.toString(),
+            "timestrap": formattedDate1.toString(),
+            // "timestamp": formattedDate1.toString(),
           }).then((value) {
             _chat.text.toString();
             _scrollController.animateTo(
@@ -452,7 +461,7 @@ class _MessagePageState extends State<MessagePage> {
                                               ),
                                             ),
                                             Text(
-                                              document["time"].toString(),
+                                              document["timestrap"].toString(),
                                               style: TextStyle(
                                                 fontSize: 12,
                                                 color: Color.fromARGB(
@@ -492,17 +501,17 @@ class _MessagePageState extends State<MessagePage> {
                                                   )
                                                 : (document["type"] == "video")
                                                     ? Container(
-                                              decoration: BoxDecoration(
-                                                  borderRadius:
-                                                  BorderRadius
-                                                      .circular(
-                                                      20)),
-                                              height: 300,
-                                              width: 170,
-                                              child: addvideo(
-                                                  vid: document[
-                                                  "massages"]),
-                                            )
+                                                        decoration: BoxDecoration(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        20)),
+                                                        height: 300,
+                                                        width: 170,
+                                                        child: addvideo(
+                                                            vid: document[
+                                                                "massages"]),
+                                                      )
                                                     : (document["type"] ==
                                                             "location")
                                                         ? Container(
@@ -537,7 +546,7 @@ class _MessagePageState extends State<MessagePage> {
                                             ),
                                           ),
                                           Text(
-                                            document["time"].toString(),
+                                            document["timestrap"].toString(),
                                             style: TextStyle(
                                                 fontSize: 12,
                                                 color: Color.fromARGB(
@@ -587,94 +596,94 @@ class _MessagePageState extends State<MessagePage> {
                                       crossAxisCount: 3,
                                     ),
                                     children: [
-                                      GestureDetector(
-                                        onTap: () async {
-                                          permission();
-                                          DateTime now = DateTime.now();
-                                          String formattedDate =
-                                              DateFormat("dd-MM-yy")
-                                                  .format(now);
-                                          print(formattedDate);
-                                          String formattedDate1 = DateFormat('')
-                                              .add_jms()
-                                              .format(now);
-                                          print(formattedDate);
-                                          print(formattedDate1);
-                                          final XFile? image =
-                                              await _picker.pickImage(
-                                                  source: ImageSource.camera);
-                                          imagefile = File(image!.path);
-                                          var uuid = Uuid();
-                                          var filename =
-                                              uuid.v4().toString() + ".jpg";
-                                          print("file:" + filename);
-                                          await FirebaseStorage.instance
-                                              .ref(filename)
-                                              .putFile(imagefile!)
-                                              .whenComplete(() {})
-                                              .then((filedata) async {
-                                            filedata.ref
-                                                .getDownloadURL()
-                                                .then((fileurl) async {
-                                              await FirebaseFirestore.instance
-                                                  .collection("user")
-                                                  .doc(senderid)
-                                                  .collection("chat")
-                                                  .doc(receiverid)
-                                                  .collection("message")
-                                                  .add({
-                                                "senderid": senderid,
-                                                "receiverid": receiverid,
-                                                "massages": fileurl,
-                                                "type": "image",
-                                                "time": formattedDate1,
-                                                "date": formattedDate,
-                                              }).then((value) async {
-                                                await FirebaseFirestore.instance
-                                                    .collection("user")
-                                                    .doc(receiverid)
-                                                    .collection("chat")
-                                                    .doc(senderid)
-                                                    .collection("message")
-                                                    .add({
-                                                  "senderid": senderid,
-                                                  "receiverid": receiverid,
-                                                  "massages": fileurl,
-                                                  "type": "image",
-                                                  "time": formattedDate1,
-                                                  "date": formattedDate,
-                                                }).then((value) {
-                                                  _chat.text.toString();
-                                                });
-                                              });
-                                            });
-                                          });
-                                        },
-                                        child: Column(
-                                          children: [
-                                            Container(
-                                              height: 60.0,
-                                              width: 60.0,
-                                              decoration: BoxDecoration(
-                                                  shape: BoxShape.circle,
-                                                  color: Colors.cyanAccent),
-                                              child: Icon(
-                                                Icons.camera_alt_outlined,
-                                                color: Colors.black,
-                                                size: 30.0,
-                                              ),
-                                            ),
-                                            SizedBox(
-                                              height: 10,
-                                            ),
-                                            Text(
-                                              "Camera",
-                                              style: TextStyle(
-                                                  color: Colors.white),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
+                                      // GestureDetector(
+                                      //   onTap: () async {
+                                      //     permission();
+                                      //     DateTime now = DateTime.now();
+                                      //     String formattedDate =
+                                      //         DateFormat("dd-MM-yy")
+                                      //             .format(now);
+                                      //     print(formattedDate);
+                                      //     String formattedDate1 = DateFormat('')
+                                      //         .add_jms()
+                                      //         .format(now);
+                                      //     print(formattedDate);
+                                      //     print(formattedDate1);
+                                      //     final XFile? image =
+                                      //         await _picker.pickImage(
+                                      //             source: ImageSource.camera);
+                                      //     imagefile = File(image!.path);
+                                      //     var uuid = Uuid();
+                                      //     var filename =
+                                      //         uuid.v4().toString() + ".jpg";
+                                      //     print("file:" + filename);
+                                      //     await FirebaseStorage.instance
+                                      //         .ref(filename)
+                                      //         .putFile(imagefile!)
+                                      //         .whenComplete(() {})
+                                      //         .then((filedata) async {
+                                      //       filedata.ref
+                                      //           .getDownloadURL()
+                                      //           .then((fileurl) async {
+                                      //         await FirebaseFirestore.instance
+                                      //             .collection("user")
+                                      //             .doc(senderid)
+                                      //             .collection("chat")
+                                      //             .doc(receiverid)
+                                      //             .collection("message")
+                                      //             .add({
+                                      //           "senderid": senderid,
+                                      //           "receiverid": receiverid,
+                                      //           "massages": fileurl,
+                                      //           "type": "image",
+                                      //           "time": formattedDate1,
+                                      //           "date": formattedDate,
+                                      //         }).then((value) async {
+                                      //           await FirebaseFirestore.instance
+                                      //               .collection("user")
+                                      //               .doc(receiverid)
+                                      //               .collection("chat")
+                                      //               .doc(senderid)
+                                      //               .collection("message")
+                                      //               .add({
+                                      //             "senderid": senderid,
+                                      //             "receiverid": receiverid,
+                                      //             "massages": fileurl,
+                                      //             "type": "image",
+                                      //             "time": formattedDate1,
+                                      //             "date": formattedDate,
+                                      //           }).then((value) {
+                                      //             _chat.text.toString();
+                                      //           });
+                                      //         });
+                                      //       });
+                                      //     });
+                                      //   },
+                                      //   child: Column(
+                                      //     children: [
+                                      //       Container(
+                                      //         height: 60.0,
+                                      //         width: 60.0,
+                                      //         decoration: BoxDecoration(
+                                      //             shape: BoxShape.circle,
+                                      //             color: Colors.cyanAccent),
+                                      //         child: Icon(
+                                      //           Icons.camera_alt_outlined,
+                                      //           color: Colors.black,
+                                      //           size: 30.0,
+                                      //         ),
+                                      //       ),
+                                      //       SizedBox(
+                                      //         height: 10,
+                                      //       ),
+                                      //       Text(
+                                      //         "Camera",
+                                      //         style: TextStyle(
+                                      //             color: Colors.white),
+                                      //       ),
+                                      //     ],
+                                      //   ),
+                                      // ),
                                       GestureDetector(
                                         onTap: () async {
                                           final XFile? image =
@@ -717,7 +726,7 @@ class _MessagePageState extends State<MessagePage> {
                                                   source: ImageSource.gallery);
                                           imagefile = File(image!.path);
                                           video();
-                                          showFilePicker(FileType.any);
+                                          Navigator.of(context).pop();
 
                                           // FilePickerResult? imagefile =
                                           // await FilePicker.platform
@@ -738,7 +747,6 @@ class _MessagePageState extends State<MessagePage> {
                                           // video();
                                           // showFilePicker(
                                           //     FileType.video);
-                                          Navigator.of(context).pop();
                                         },
                                         child: Column(
                                           children: [
@@ -775,6 +783,7 @@ class _MessagePageState extends State<MessagePage> {
                                               loc: widget.receiverid,
                                             ),
                                           ));
+                                          Navigator.of(context).pop();
                                         },
                                         child: Column(
                                           children: [
@@ -895,8 +904,9 @@ class _MessagePageState extends State<MessagePage> {
                                   String formattedDate =
                                       DateFormat("dd-MM-yy").format(now);
                                   print(formattedDate);
-                                  String formattedDate1 =
-                                      DateFormat().add_jms().format(now);
+                                  String formattedDate1 = DateFormat()
+                                      .add_jm()
+                                      .format(DateTime.now());
                                   print(formattedDate);
                                   print(formattedDate1);
 
@@ -916,7 +926,8 @@ class _MessagePageState extends State<MessagePage> {
                                       "massages": msg,
                                       "type": "text",
                                       "date": formattedDate.toString(),
-                                      "time": formattedDate1.toString(),
+                                      "time": now.toString(),
+                                      "timestrap": formattedDate1.toString(),
                                     }).then((value) async {
                                       await FirebaseFirestore.instance
                                           .collection("user")
@@ -930,7 +941,8 @@ class _MessagePageState extends State<MessagePage> {
                                         "massages": msg,
                                         "type": "text",
                                         "date": formattedDate.toString(),
-                                        "time": formattedDate1.toString(),
+                                        "time": now.toString(),
+                                        "timestrap": formattedDate1.toString(),
                                       }).then((value) {
                                         print(value);
                                         _chat.text = '';

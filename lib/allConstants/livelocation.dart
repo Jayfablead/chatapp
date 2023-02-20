@@ -43,27 +43,22 @@ class _locationState extends State<location> {
           title: 'My Position',
         )),
   ];
+
   // created method for getting user current location
   Future<Position> getUserCurrentLocation() async {
     await Geolocator.requestPermission()
-        .then((value) {
-
-
-    })
+        .then((value) {})
         .onError((error, stackTrace) async {
       await Geolocator.requestPermission();
       print("ERROR" + error.toString());
     });
-    return await Geolocator.getCurrentPosition(
-
-    );
+    return await Geolocator.getCurrentPosition();
   }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-
-
   }
 
   // void getLocation() async{
@@ -173,7 +168,6 @@ class _locationState extends State<location> {
         ),
         floatingActionButton: FloatingActionButton.extended(
           onPressed: () async {
-
             getUserCurrentLocation().then(
               (value1) async {
                 setState(() {
@@ -204,10 +198,11 @@ class _locationState extends State<location> {
                     CameraUpdate.newCameraPosition(cameraPosition));
               },
             );
-            DateTime now = DateTime.now();
-            String formattedDate = DateFormat("dd-MM-yy").format(now);
-            print(formattedDate);
-            String formattedDate1 = DateFormat().add_jms().format(now);
+            DateTime date = DateTime.now();
+            print(date);
+            String formattedDate = DateFormat('dd-MM-yy').format(date);
+            String formattedDate1 =
+                DateFormat().add_jm().format(DateTime.now());
             SharedPreferences pref = await SharedPreferences.getInstance();
             var senderid = pref.getString("senderid");
             var receiverid = widget.loc;
@@ -223,7 +218,8 @@ class _locationState extends State<location> {
               "massages": geoPoint,
               "type": "location",
               "date": formattedDate.toString(),
-              "time": formattedDate1.toString(),
+              "time": date.toString(),
+              "timestrap": formattedDate1.toString(),
             }).then((value) async {
               await FirebaseFirestore.instance
                   .collection("user")
@@ -237,7 +233,8 @@ class _locationState extends State<location> {
                 "massages": geoPoint,
                 "type": "location",
                 "date": formattedDate.toString(),
-                "time": formattedDate1.toString(),
+                "time": date.toString(),
+                "timestrap": formattedDate1.toString(),
               }).then((value) {
                 print(value);
 
