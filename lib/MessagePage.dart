@@ -1184,41 +1184,6 @@ class _MessagePageState extends State<MessagePage> {
                                         ),
                                       ),
                                       InkWell(
-                                        onTap: () async {
-                                          final XFile? image =
-                                              await _picker.pickImage(
-                                                  source: ImageSource.gallery);
-
-                                          imagefile = File(image!.path);
-                                          upload();
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: Column(
-                                          children: [
-                                            Container(
-                                              height: 60.0,
-                                              width: 60.0,
-                                              decoration: BoxDecoration(
-                                                  shape: BoxShape.circle,
-                                                  color: Colors.cyanAccent),
-                                              child: Icon(
-                                                Icons.location_on_outlined,
-                                                color: Colors.black,
-                                                size: 30.0,
-                                              ),
-                                            ),
-                                            SizedBox(
-                                              height: 10,
-                                            ),
-                                            Text(
-                                              "Location",
-                                              style: TextStyle(
-                                                  color: Colors.white),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      InkWell(
                                         onTap: () {
                                           print('hello');
                                           Navigator.of(context)
