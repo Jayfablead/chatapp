@@ -12,6 +12,7 @@
 
         android:label="Quick Chat"
         android:name="${applicationName}"
+        android:requestLegacyExternalStorage="true"
         android:icon="@mipmap/ic_launcher">
         <meta-data android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyD7Q43BHeMGH2xa0Xf8iQp_HgvcigIjKE8"/>

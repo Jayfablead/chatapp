@@ -1,21 +1,30 @@
+import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:chat1/addvideo.dart';
 import 'package:chat1/allConstants/livelocation.dart';
 import 'package:chat1/screens/profilepage.dart';
+import 'package:chat1/widgets/loader.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:contacts_service/contacts_service.dart';
+import 'package:dio/dio.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:file_picker/file_picker.dart';
 
 import 'package:firebase_storage/firebase_storage.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:gallery_saver/gallery_saver.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -36,6 +45,7 @@ class _MessagePageState extends State<MessagePage> {
   TextEditingController _chat = TextEditingController();
 
   File? imagefile;
+  File? pdffile;
   late Iterable<Contact> _contacts;
   ImagePicker _picker = ImagePicker();
   var senderid;
@@ -44,6 +54,7 @@ class _MessagePageState extends State<MessagePage> {
   int? diff;
   bool emojiShowing = false;
   File? file;
+  Timer? timer;
 
   // int formattedTime =(DateFormat.Hm().format(DateTime.now()));
 
@@ -96,6 +107,7 @@ class _MessagePageState extends State<MessagePage> {
     var uuid = Uuid();
     var filename = uuid.v4().toString() + ".jpg";
     print("file:" + filename);
+    EasyLoading.show(status: 'Uploading Image ...');
     await FirebaseStorage.instance
         .ref(filename)
         .putFile(imagefile!)
@@ -139,6 +151,67 @@ class _MessagePageState extends State<MessagePage> {
                 _scrollController.position.minScrollExtent,
                 duration: Duration(milliseconds: 200),
                 curve: Curves.easeInOut);
+            EasyLoading.showSuccess(' Upload Success!');
+          });
+        });
+      });
+    });
+  }
+
+  uploadpdf() async {
+    DateTime date = DateTime.now();
+    print(date);
+    String formattedDate = DateFormat('dd-MM-yy').format(date);
+    String formattedDate1 = DateFormat().add_jm().format(DateTime.now());
+    print(formattedDate1);
+    var uuid = Uuid();
+    var filename = uuid.v4().toString() + ".pdf";
+    print("file:" + filename);
+    EasyLoading.show(status: 'Uploading Pdf ...');
+    await FirebaseStorage.instance
+        .ref(filename)
+        .putFile(pdffile!)
+        .whenComplete(() {})
+        .then((filedata) async {
+      filedata.ref.getDownloadURL().then((fileurl) async {
+        // print("url:"+fileurl.toString());
+        await FirebaseFirestore.instance
+            .collection("user")
+            .doc(senderid)
+            .collection("chat")
+            .doc(receiverid)
+            .collection("message")
+            .add({
+          "senderid": senderid,
+          "receiverid": receiverid,
+          "massages": fileurl,
+          "type": "pdf",
+          "date": formattedDate.toString(),
+          "time": date.toString(), "timestrap": formattedDate1.toString(),
+
+          // "timestamp": formattedDate1.toString(),
+        }).then((value) async {
+          await FirebaseFirestore.instance
+              .collection("user")
+              .doc(receiverid)
+              .collection("chat")
+              .doc(senderid)
+              .collection("message")
+              .add({
+            "senderid": senderid,
+            "receiverid": receiverid,
+            "massages": fileurl,
+            "type": "pdf",
+            "date": formattedDate.toString(),
+            "time": date.toString(), "timestrap": formattedDate1.toString(),
+
+            // "timestamp": formattedDate1.toString(),
+          }).then((value) {
+            _scrollController.animateTo(
+                _scrollController.position.minScrollExtent,
+                duration: Duration(milliseconds: 200),
+                curve: Curves.easeInOut);
+            EasyLoading.showSuccess(' Upload Success!');
           });
         });
       });
@@ -151,6 +224,7 @@ class _MessagePageState extends State<MessagePage> {
     String formattedDate1 = DateFormat().add_jm().format(DateTime.now());
     var uuid = Uuid();
     var filename = uuid.v4().toString() + ".mp4";
+    EasyLoading.show(status: 'Uploading Video...');
     await FirebaseStorage.instance
         .ref(filename)
         .putFile(imagefile!)
@@ -195,6 +269,7 @@ class _MessagePageState extends State<MessagePage> {
                 _scrollController.position.minScrollExtent,
                 duration: Duration(milliseconds: 200),
                 curve: Curves.easeInOut);
+            EasyLoading.showSuccess(' Upload Success!');
           });
         });
       });
@@ -207,6 +282,13 @@ class _MessagePageState extends State<MessagePage> {
 
     getdata();
     setState(() {});
+    configLoading();
+    EasyLoading.addStatusCallback((status) {
+      print('EasyLoading Status $status');
+      if (status == EasyLoadingStatus.dismiss) {
+        timer?.cancel();
+      }
+    });
   }
 
   @override
@@ -366,99 +448,282 @@ class _MessagePageState extends State<MessagePage> {
                                           crossAxisAlignment:
                                               CrossAxisAlignment.end,
                                           children: [
-                                            Container(
-                                              // width: MediaQuery.of(context).size.width*0.70,
-                                              margin: EdgeInsets.only(
-                                                  top: 8,
-                                                  bottom: 8,
-                                                  right: 5,
-                                                  left: 5),
-                                              padding: EdgeInsets.all(9.0),
-                                              child: (document["type"] ==
-                                                      "image")
-                                                  ? ClipRRect(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              20),
-                                                      child: Image.network(
-                                                        document["massages"],
-                                                        width: 250.0,
-                                                        height: 250.0,
-                                                        fit: BoxFit.cover,
-                                                      ),
-                                                    )
-                                                  : (document["type"] ==
-                                                          "video")
-                                                      ? Container(
-                                                          decoration: BoxDecoration(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          20)),
-                                                          height: 300,
-                                                          width: 170,
-                                                          child: addvideo(
-                                                              vid: document[
-                                                                  "massages"]),
-                                                        )
-                                                      // ? GestureDetector(
-                                                      //     onTap: () async {
-                                                      //       Navigator.of(context).push(
-                                                      //           MaterialPageRoute(
-                                                      //               builder:
-                                                      //                   (context) =>
-                                                      //                       addvideo(
-                                                      //                         vid: document["massages"],
-                                                      //                       )));
-                                                      //     },
-                                                      //     child: Container(
-                                                      //         height: 19.0,
-                                                      //         // padding:
-                                                      //         //     EdgeInsets.all(1.0),
-                                                      //         child: Text(
-                                                      //           "Video",
-                                                      //           style: TextStyle(
-                                                      //               fontSize:
-                                                      //                   15.0),
-                                                      //         )),
-                                                      //   )
-                                                      : (document["type"] ==
-                                                              "location")
-                                                          ? Container(
-                                                              height: 200,
-                                                              width: 400,
-                                                              child: Showloc(
-                                                                loc: widget
-                                                                    .receiverid,
-                                                              ))
-                                                          : Text(
+                                            Stack(
+                                              children: [
+                                                Container(
+                                                  // width: MediaQuery.of(context).size.width*0.70,
+                                                  margin: EdgeInsets.only(
+                                                      top: 8,
+                                                      bottom: 8,
+                                                      right: 5,
+                                                      left: 5),
+                                                  padding: EdgeInsets.all(9.0),
+                                                  child: (document["type"] ==
+                                                          "image")
+                                                      ? InkWell(
+                                                          onTap: () {
+                                                            showDialog(
+                                                              context: context,
+                                                              builder:
+                                                                  (BuildContext
+                                                                      context) {
+                                                                return AlertDialog(
+                                                                  backgroundColor:
+                                                                      Color(
+                                                                          0xff4d4d4d),
+                                                                  shape:
+                                                                      RoundedRectangleBorder(
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                            10),
+                                                                  ),
+                                                                  content:
+                                                                      ClipRRect(
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                            12),
+                                                                    child: Image
+                                                                        .network(
+                                                                      document[
+                                                                          "massages"],
+                                                                      width:
+                                                                          250.0,
+                                                                      // height: 450.0,
+                                                                      fit: BoxFit
+                                                                          .cover,
+                                                                    ),
+                                                                  ),
+                                                                  contentPadding:
+                                                                      EdgeInsets
+                                                                          .all(
+                                                                              10),
+                                                                );
+                                                              },
+                                                            );
+                                                          },
+                                                          child: ClipRRect(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        20),
+                                                            child:
+                                                                Image.network(
                                                               document[
                                                                   "massages"],
-                                                              maxLines: 20,
-                                                              style: TextStyle(
-                                                                  color: Colors
-                                                                      .black,
-                                                                  fontSize:
-                                                                      15.0),
-                                                              textAlign:
-                                                                  TextAlign
-                                                                      .right,
+                                                              width: 250.0,
+                                                              // height: 250.0,
+                                                              fit: BoxFit.cover,
+                                                              frameBuilder:
+                                                                  (context,
+                                                                      child,
+                                                                      frame,
+                                                                      wasSynchronouslyLoaded) {
+                                                                return child;
+                                                              },
+                                                              loadingBuilder:
+                                                                  (context,
+                                                                      child,
+                                                                      loadingProgress) {
+                                                                if (loadingProgress ==
+                                                                    null) {
+                                                                  return child;
+                                                                } else {
+                                                                  return Center(
+                                                                    child: CircularProgressIndicator(
+                                                                        color: Colors
+                                                                            .black),
+                                                                  );
+                                                                }
+                                                              },
                                                             ),
+                                                          ),
+                                                        )
+                                                      : (document["type"] ==
+                                                              "video")
+                                                          ? Stack(
+                                                              children: [
+                                                                Container(
+                                                                  decoration: BoxDecoration(
+                                                                      borderRadius:
+                                                                          BorderRadius.circular(
+                                                                              20)),
+                                                                  height: 300,
+                                                                  width: 170,
+                                                                  child: addvideo(
+                                                                      vid: document[
+                                                                          "massages"]),
+                                                                ),
+                                                                Positioned(
+                                                                  left: 130,
+                                                                  top: 2,
+                                                                  child:
+                                                                      CircleAvatar(
+                                                                    backgroundColor: Colors
+                                                                        .black
+                                                                        .withOpacity(
+                                                                            0.60),
+                                                                    child: PopupMenuButton(
+                                                                        shape: RoundedRectangleBorder(
+                                                                          side: BorderSide(
+                                                                              color: Colors.cyan,
+                                                                              width: 3),
+                                                                          borderRadius:
+                                                                              BorderRadius.all(
+                                                                            Radius.circular(15.0),
+                                                                          ),
+                                                                        ),
+                                                                        icon: Icon(
+                                                                          Icons
+                                                                              .more_vert_rounded,
+                                                                          color:
+                                                                              Colors.white,
+                                                                        ),
+                                                                        itemBuilder: (context) => [
+                                                                              PopupMenuItem(
+                                                                                  onTap: () {
+                                                                                    print('Hellow Video');
+                                                                                    _saveVideo(document["massages"], 'Billie');
+                                                                                  },
+                                                                                  child: Row(
+                                                                                    children: [
+                                                                                      Icon(Icons.save_alt_rounded),
+                                                                                      SizedBox(
+                                                                                        width: 10,
+                                                                                      ),
+                                                                                      Text(
+                                                                                        'Save Video',
+                                                                                        style: TextStyle(color: Colors.white),
+                                                                                      )
+                                                                                    ],
+                                                                                  ))
+                                                                            ],
+                                                                        color: Color(0xff131313)),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            )
+                                                          // ? GestureDetector(
+                                                          //     onTap: () async {
+                                                          //       Navigator.of(context).push(
+                                                          //           MaterialPageRoute(
+                                                          //               builder:
+                                                          //                   (context) =>
+                                                          //                       addvideo(
+                                                          //                         vid: document["massages"],
+                                                          //                       )));
+                                                          //     },
+                                                          //     child: Container(
+                                                          //         height: 19.0,
+                                                          //         // padding:
+                                                          //         //     EdgeInsets.all(1.0),
+                                                          //         child: Text(
+                                                          //           "Video",
+                                                          //           style: TextStyle(
+                                                          //               fontSize:
+                                                          //                   15.0),
+                                                          //         )),
+                                                          //   )
+                                                          : (document["type"] ==
+                                                                  "location")
+                                                              ? Container(
+                                                                  height: 200,
+                                                                  width: 400,
+                                                                  child:
+                                                                      Showloc(
+                                                                    loc: widget
+                                                                        .receiverid,
+                                                                  ))
+                                                              : Text(
+                                                                  document[
+                                                                      "massages"],
+                                                                  maxLines: 20,
+                                                                  style: TextStyle(
+                                                                      color: Colors
+                                                                          .black,
+                                                                      fontSize:
+                                                                          15.0),
+                                                                  textAlign:
+                                                                      TextAlign
+                                                                          .right,
+                                                                ),
 
-                                              decoration: BoxDecoration(
-                                                color: (document["type"] ==
-                                                        "image")
-                                                    ? Color(0xff3AA1FF)
-                                                    : Color(0xff3AAFF1),
-                                                borderRadius: BorderRadius.only(
-                                                    topRight:
-                                                        Radius.circular(25),
-                                                    topLeft:
-                                                        Radius.circular(25),
-                                                    bottomLeft:
-                                                        Radius.circular(25)),
-                                                shape: BoxShape.rectangle,
-                                              ),
+                                                  decoration: BoxDecoration(
+                                                    color: (document["type"] ==
+                                                            "image")
+                                                        ? Colors.cyan
+                                                        : Colors.cyan,
+                                                    borderRadius:
+                                                        BorderRadius.only(
+                                                            topRight:
+                                                                Radius.circular(
+                                                                    25),
+                                                            topLeft:
+                                                                Radius.circular(
+                                                                    25),
+                                                            bottomLeft:
+                                                                Radius.circular(
+                                                                    25)),
+                                                    shape: BoxShape.rectangle,
+                                                  ),
+                                                ),
+                                                Positioned(
+                                                  left: 223,
+                                                  top: 18,
+                                                  child: CircleAvatar(
+                                                    backgroundColor: Colors
+                                                        .black
+                                                        .withOpacity(0.60),
+                                                    child: PopupMenuButton(
+                                                        shape:
+                                                            RoundedRectangleBorder(
+                                                          side: BorderSide(
+                                                              color:
+                                                                  Colors.cyan,
+                                                              width: 3),
+                                                          borderRadius:
+                                                              BorderRadius.all(
+                                                            Radius.circular(
+                                                                15.0),
+                                                          ),
+                                                        ),
+                                                        icon: Icon(
+                                                          Icons
+                                                              .more_vert_rounded,
+                                                          color: Colors.white,
+                                                        ),
+                                                        itemBuilder:
+                                                            (context) => [
+                                                                  PopupMenuItem(
+                                                                      onTap:
+                                                                          () {
+                                                                        print(
+                                                                            'Hellow Image');
+                                                                        _save(
+                                                                            document["massages"],
+                                                                            "kittie");
+                                                                      },
+                                                                      child:
+                                                                          Row(
+                                                                        children: [
+                                                                          Icon(Icons
+                                                                              .save_alt_rounded),
+                                                                          SizedBox(
+                                                                            width:
+                                                                                10,
+                                                                          ),
+                                                                          Text(
+                                                                            'Save Image',
+                                                                            style:
+                                                                                TextStyle(color: Colors.white),
+                                                                          )
+                                                                        ],
+                                                                      ))
+                                                                ],
+                                                        color:
+                                                            Color(0xff131313)),
+                                                  ),
+                                                ),
+                                              ],
                                             ),
                                             Text(
                                               document["timestrap"].toString(),
@@ -481,69 +746,213 @@ class _MessagePageState extends State<MessagePage> {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
-                                          Container(
-                                            //  \ height: 20.0,
-                                            // width: 220.0,
-                                            margin: EdgeInsets.symmetric(
-                                                vertical: 10.0),
-                                            padding: EdgeInsets.all(10.0),
-                                            child: (document["type"] == "image")
-                                                ? ClipRRect(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            20),
-                                                    child: Image.network(
-                                                      document["massages"],
-                                                      width: 250.0,
-                                                      height: 250.0,
-                                                      fit: BoxFit.cover,
-                                                    ),
-                                                  )
-                                                : (document["type"] == "video")
-                                                    ? Container(
-                                                        decoration: BoxDecoration(
+                                          Stack(
+                                            children: [
+                                              Container(
+                                                //  \ height: 20.0,
+                                                // width: 220.0,
+                                                margin: EdgeInsets.symmetric(
+                                                    vertical: 10.0),
+                                                padding: EdgeInsets.all(10.0),
+                                                child: (document["type"] ==
+                                                        "image")
+                                                    ? Stack(
+                                                        children: [
+                                                          ClipRRect(
                                                             borderRadius:
                                                                 BorderRadius
                                                                     .circular(
-                                                                        20)),
-                                                        height: 300,
-                                                        width: 170,
-                                                        child: addvideo(
-                                                            vid: document[
-                                                                "massages"]),
+                                                                        20),
+                                                            child:
+                                                                Image.network(
+                                                              document[
+                                                                  "massages"],
+                                                              width: 250.0,
+                                                              fit: BoxFit.cover,
+                                                              frameBuilder:
+                                                                  (context,
+                                                                      child,
+                                                                      frame,
+                                                                      wasSynchronouslyLoaded) {
+                                                                return child;
+                                                              },
+                                                              loadingBuilder:
+                                                                  (context,
+                                                                      child,
+                                                                      loadingProgress) {
+                                                                if (loadingProgress ==
+                                                                    null) {
+                                                                  return child;
+                                                                } else {
+                                                                  return Center(
+                                                                    child:
+                                                                        CircularProgressIndicator(),
+                                                                  );
+                                                                }
+                                                              },
+                                                            ),
+                                                          ),
+                                                          Positioned(
+                                                            top: 2,
+                                                            child: CircleAvatar(
+                                                              backgroundColor:
+                                                                  Colors.black
+                                                                      .withOpacity(
+                                                                          0.60),
+                                                              child:
+                                                                  PopupMenuButton(
+                                                                      shape:
+                                                                          RoundedRectangleBorder(
+                                                                        side: BorderSide(
+                                                                            color:
+                                                                                Colors.cyan,
+                                                                            width: 3),
+                                                                        borderRadius:
+                                                                            BorderRadius.all(
+                                                                          Radius.circular(
+                                                                              15.0),
+                                                                        ),
+                                                                      ),
+                                                                      icon:
+                                                                          Icon(
+                                                                        Icons
+                                                                            .more_vert_rounded,
+                                                                        color: Colors
+                                                                            .white,
+                                                                      ),
+                                                                      itemBuilder:
+                                                                          (context) =>
+                                                                              [
+                                                                                PopupMenuItem(
+                                                                                    onTap: () {
+                                                                                      print('Hellow Image Recive');
+                                                                                      _save(document["massages"], "kittie");
+                                                                                    },
+                                                                                    child: Row(
+                                                                                      children: [
+                                                                                        Icon(Icons.save_alt_rounded),
+                                                                                        SizedBox(
+                                                                                          width: 10,
+                                                                                        ),
+                                                                                        Text(
+                                                                                          'Save Image',
+                                                                                          style: TextStyle(color: Colors.white),
+                                                                                        )
+                                                                                      ],
+                                                                                    ))
+                                                                              ],
+                                                                      color: Color(
+                                                                          0xff131313)),
+                                                            ),
+                                                          ),
+                                                        ],
                                                       )
                                                     : (document["type"] ==
-                                                            "location")
-                                                        ? Container(
-                                                            height: 200,
-                                                            width: 400,
-                                                            child: Showloc(
-                                                              loc: widget
-                                                                  .receiverid,
-                                                            ),
+                                                            "video")
+                                                        ? Stack(
+                                                            children: [
+                                                              Container(
+                                                                decoration: BoxDecoration(
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                            20)),
+                                                                height: 300,
+                                                                width: 170,
+                                                                child: addvideo(
+                                                                    vid: document[
+                                                                        "massages"]),
+                                                              ),
+                                                              Positioned(
+                                                                top: 2,
+                                                                child:
+                                                                    CircleAvatar(
+                                                                  backgroundColor: Colors
+                                                                      .black
+                                                                      .withOpacity(
+                                                                          0.60),
+                                                                  child: PopupMenuButton(
+                                                                      shape: RoundedRectangleBorder(
+                                                                        side: BorderSide(
+                                                                            color:
+                                                                                Colors.cyan,
+                                                                            width: 3),
+                                                                        borderRadius:
+                                                                            BorderRadius.all(
+                                                                          Radius.circular(
+                                                                              15.0),
+                                                                        ),
+                                                                      ),
+                                                                      icon: Icon(
+                                                                        Icons
+                                                                            .more_vert_rounded,
+                                                                        color: Colors
+                                                                            .white,
+                                                                      ),
+                                                                      itemBuilder: (context) => [
+                                                                            PopupMenuItem(
+                                                                                onTap: () {
+                                                                                  print('Hellow Video recive');
+                                                                                  _saveVideo(document["massages"], 'Billie');
+                                                                                },
+                                                                                child: Row(
+                                                                                  children: [
+                                                                                    Icon(Icons.save_alt_rounded),
+                                                                                    SizedBox(
+                                                                                      width: 10,
+                                                                                    ),
+                                                                                    Text(
+                                                                                      'Save Video',
+                                                                                      style: TextStyle(color: Colors.white),
+                                                                                    )
+                                                                                  ],
+                                                                                ))
+                                                                          ],
+                                                                      color: Color(0xff131313)),
+                                                                ),
+                                                              ),
+                                                            ],
                                                           )
-                                                        : Text(
-                                                            document[
-                                                                "massages"],
-                                                            style: TextStyle(
-                                                                color: Colors
-                                                                    .white),
-                                                            textAlign:
-                                                                TextAlign.left,
-                                                          ),
-                                            decoration: BoxDecoration(
-                                              color:
-                                                  (document["type"] == "image")
+                                                        : (document["type"] ==
+                                                                "location")
+                                                            ? Container(
+                                                                height: 200,
+                                                                width: 400,
+                                                                child: Showloc(
+                                                                  loc: widget
+                                                                      .receiverid,
+                                                                ),
+                                                              )
+                                                            : Text(
+                                                                document[
+                                                                    "massages"],
+                                                                style: TextStyle(
+                                                                    color: Colors
+                                                                        .white),
+                                                                textAlign:
+                                                                    TextAlign
+                                                                        .left,
+                                                              ),
+                                                decoration: BoxDecoration(
+                                                  color: (document["type"] ==
+                                                          "image")
                                                       ? Color(0xff223152)
                                                       : Color(0xff223152)
                                                           .withOpacity(0.3),
-                                              borderRadius: BorderRadius.only(
-                                                  topRight: Radius.circular(25),
-                                                  topLeft: Radius.circular(25),
-                                                  bottomRight:
-                                                      Radius.circular(25)),
-                                              shape: BoxShape.rectangle,
-                                            ),
+                                                  borderRadius:
+                                                      BorderRadius.only(
+                                                          topRight:
+                                                              Radius.circular(
+                                                                  25),
+                                                          topLeft:
+                                                              Radius.circular(
+                                                                  25),
+                                                          bottomRight:
+                                                              Radius.circular(
+                                                                  25)),
+                                                  shape: BoxShape.rectangle,
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                           Text(
                                             document["timestrap"].toString(),
@@ -573,7 +982,7 @@ class _MessagePageState extends State<MessagePage> {
                   height: 10,
                 ),
                 Padding(
-                  padding: EdgeInsets.only(left: 5, right: 5, bottom: 5),
+                  padding: EdgeInsets.only(left: 5, right: 6, bottom: 5),
                   child: Row(
                     children: [
                       IconButton(
@@ -775,15 +1184,55 @@ class _MessagePageState extends State<MessagePage> {
                                         ),
                                       ),
                                       InkWell(
+                                        onTap: () async {
+                                          final XFile? image =
+                                              await _picker.pickImage(
+                                                  source: ImageSource.gallery);
+
+                                          imagefile = File(image!.path);
+                                          upload();
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: Column(
+                                          children: [
+                                            Container(
+                                              height: 60.0,
+                                              width: 60.0,
+                                              decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  color: Colors.cyanAccent),
+                                              child: Icon(
+                                                Icons.location_on_outlined,
+                                                color: Colors.black,
+                                                size: 30.0,
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              height: 10,
+                                            ),
+                                            Text(
+                                              "Location",
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      InkWell(
                                         onTap: () {
                                           print('hello');
                                           Navigator.of(context)
                                               .push(MaterialPageRoute(
                                             builder: (context) => location(
-                                              loc: widget.receiverid,
-                                            ),
+                                                loc: widget.receiverid),
                                           ));
                                           Navigator.of(context).pop();
+                                          // Navigator.of(context)
+                                          //     .push(MaterialPageRoute(
+                                          //   builder: (context) => location(
+                                          //     loc: widget.receiverid,
+                                          //   ),
+                                          // ));
                                         },
                                         child: Column(
                                           children: [
@@ -850,7 +1299,7 @@ class _MessagePageState extends State<MessagePage> {
                               padding: EdgeInsets.all(8.0),
                               child: Container(
                                 height: 50.0,
-                                width: 260,
+                                width: MediaQuery.of(context).size.width * 0.65,
                                 child: TextField(
                                   style: TextStyle(color: Colors.white),
                                   cursorColor:
@@ -1017,5 +1466,42 @@ class _MessagePageState extends State<MessagePage> {
     if (await Permission.storage.isDenied) {
       print("location");
     }
+  }
+
+  _saveVideo(String path, String name) async {
+    var appDocDir = await getTemporaryDirectory();
+    String savePath = appDocDir.path + "/$name.mp4";
+    EasyLoading.show(status: 'Downloading Video ...');
+    await Dio().download(path, savePath);
+    final result = await ImageGallerySaver.saveFile(savePath);
+    print(result);
+    EasyLoading.showSuccess('Video Saved to Gallery');
+    // Fluttertoast.showToast(
+    //     msg: 'Video Saved to Gallery',
+    //     toastLength: Toast.LENGTH_SHORT,
+    //     timeInSecForIosWeb: 1,
+    //     backgroundColor: Colors.cyan,
+    //     textColor: Colors.white,
+    //     fontSize: 16.0);
+  }
+
+  _save(String path, String name) async {
+    EasyLoading.show(status: 'Downloading Image ...');
+    var response = await Dio()
+        .get(path, options: Options(responseType: ResponseType.bytes));
+
+    var result = await ImageGallerySaver.saveImage(
+        Uint8List.fromList(response.data),
+        quality: 60,
+        name: name);
+    print(response.data);
+    EasyLoading.showSuccess('Image Saved to Gallery');
+    // Fluttertoast.showToast(
+    //     msg: 'Image Saved to Gallery',
+    //     toastLength: Toast.LENGTH_SHORT,
+    //     timeInSecForIosWeb: 1,
+    //     backgroundColor: Colors.cyan,
+    //     textColor: Colors.white,
+    //     fontSize: 16.0);
   }
 }
